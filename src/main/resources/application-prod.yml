@@ -1,0 +1,127 @@
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 3MB
+  application:
+    name: ai-talk
+# 邮箱服务
+  mail:
+    username: wwqqblog@qq.com
+    password:
+    host: smtp.qq.com
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+#  data:
+#    redis:
+#      connect-timeout: 15
+#      database: 1
+#      host: 60.205.7.10
+#      timeout: 10
+#      port: 6379
+#      password: '123456'
+#      jedis:
+#        pool:
+#          enabled: true
+#          max-active: 5
+#          max-idle: 5
+#          min-idle: 0
+
+# langchain4j
+langchain4j:
+  community:
+    dashscope:
+      text-model:
+        model-name: qwen-plus
+        api-key: ${DASHSCOPE_AI_KEY}
+      image-generate-text-model:
+        model-name: qwen-vl-plus
+        api-key: ${DASHSCOPE_AI_KEY}
+      text-generate-image-model:
+        model-name: wanx2.1-t2i-plus
+        api-key: ${DASHSCOPE_AI_KEY}
+      embed-model:
+        model-name: text-embedding-v4
+        api-key: ${DASHSCOPE_AI_KEY}
+# springdoc-openapi config
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.qingqiu.aigeek.controller
+# knife4j config
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+# mcp服务
+mcp:
+  api-key:
+  url:
+# mybatis-plus
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+# sa-token
+sa-token:
+  token-name: authorization
+  # token有效期，同一账号先后多端登录，token过期后先删除token-session，待该账号下所有token全部过期后才删除account-session。
+  timeout: 7200
+  is-log: true
+  auto-renew: true
+logging:
+  level:
+    dev:
+      langchain4j: DEBUG
+
+# 向量存储数据源配置
+datasource:
+  pg:
+    host: 60.205.7.10
+    port: 5432
+    database: ai_talk
+    username: postgres
+    password: qingqiugeek
+    table: vector_store
+    dimension: 1536
+# searXNG联网搜索
+searxng:
+  url: http://60.205.7.10:8888
+  timeout: 60
+#  contentRetriever 配置
+content-retriever:
+# 最多 xxx 个检索结果
+  max-Results: 6
+# 过滤掉分数小于 xxx 的结果
+  min-score: 0.5
+# 会话记忆配置
+chat-memory:
+#  聊天窗口最多存储消息数量
+  max-messages: 3
+#  最多存储会话token数量
+  max-tokens: 10000
