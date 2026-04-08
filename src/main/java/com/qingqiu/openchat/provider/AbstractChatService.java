@@ -1,0 +1,28 @@
+package com.qingqiu.openchat.provider;
+
+import com.qingqiu.openchat.domain.entity.ModelProvider;
+import com.qingqiu.openchat.domain.request.ChatRequest;
+import dev.langchain4j.model.chat.StreamingChatModel;
+
+/**
+ * 聊天消息Service接口
+ *
+ * @author ageerle
+ * @date 2025-12-14
+ */
+public interface AbstractChatService {
+
+    /**
+     * 创建流式聊天模型
+     *
+     * @param chatModelVo 模型配置
+     * @param chatRequest 聊天请求
+     * @return 流式聊天模型实例
+     */
+    StreamingChatModel buildStreamingChatModel(ModelProvider chatModelVo, ChatRequest chatRequest);
+
+    /**
+     * 获取服务提供商名称
+     */
+    String getProviderName();
+}
