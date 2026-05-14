@@ -21,8 +21,8 @@ public class ChatSessionConverter {
         Assert.notNull(chatSessionDTO, "ChatSessionDTO cannot be null");
 
         return ChatSession.builder()
-                .id(chatSessionDTO.getId())
-                .agentId(chatSessionDTO.getAgentId())
+            .id(chatSessionDTO.getId())
+            .agentId(chatSessionDTO.getAgentId())
                 .title(chatSessionDTO.getTitle())
                 .metadata(chatSessionDTO.getMetadata() != null 
                         ? objectMapper.writeValueAsString(chatSessionDTO.getMetadata()) 
@@ -36,8 +36,8 @@ public class ChatSessionConverter {
         Assert.notNull(chatSession, "ChatSession cannot be null");
 
         return ChatSessionDTO.builder()
-                .id(chatSession.getId())
-                .agentId(chatSession.getAgentId())
+            .id(chatSession.getId())
+            .agentId(chatSession.getAgentId())
                 .title(chatSession.getTitle())
                 .metadata(chatSession.getMetadata() != null 
                         ? objectMapper.readValue(chatSession.getMetadata(), ChatSessionDTO.MetaData.class) 

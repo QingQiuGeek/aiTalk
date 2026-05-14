@@ -46,21 +46,14 @@ public class SaTokenConfigure implements WebMvcConfigurer {
         .excludePathPatterns(
             "/user/login",
             "/user/register",
-            "/user/getUserInfo/{uid}",
-            "/user/sendRegisterCode",
-            "/user/find/{userName}",
-            "/user/userInfoData",
-            "/passage/otherPassages/{uid}",
-            "/passage/topCollects",
-            "/passage/content/{uid}/{pid}",
-            "/passage/homePassageList",
-            "/passage/search",
-            "/passage/passageInfo/{pid}",
-            "/passage/topPassages",
-            "/comment/getCommentByCursor",
-            "/category/getCategories",
-            "/tag/getRandomTags",
-            "/doc.html/**"
+            "/user/register-code",
+        "/doc.html/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/v3/api-docs/**",
+        "/webjars/**",
+        "/favicon.ico",
+        "/error"
         );
 
 

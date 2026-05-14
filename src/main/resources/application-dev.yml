@@ -8,7 +8,7 @@ spring:
       enabled: true
       max-file-size: 3MB
   application:
-    name: ai-geek
+    name: openchat
 # 邮箱服务
   mail:
     username:

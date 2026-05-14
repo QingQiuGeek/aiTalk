@@ -15,7 +15,7 @@ public class ModelProviderVO {
    * 主键 ID (对应数据库 bigint)
    * 注意：如果数据库实际使用了 UUID，此处应改为 java.util.UUID
    */
-  private Long modelId;
+  private Long id;
 
   /**
    * 所属用户 ID

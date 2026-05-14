@@ -19,7 +19,7 @@ public class ChatAgentApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         Map<String, RetrievalAugmentor> beans = ctx.getBeansOfType(RetrievalAugmentor.class);
-        System.out.println("-----------------"+beans.keySet());
+        System.out.println("Load RetrievalAugmentor: "+beans.keySet());
     }
 
     public static void main(String[] args) {

@@ -9,9 +9,9 @@ import lombok.Data;
 public class ChatSessionDTO {
     private String id;
 
-    private String agentId;
-
     private String title;
+
+    private Long agentId;
 
     private MetaData metadata;
 

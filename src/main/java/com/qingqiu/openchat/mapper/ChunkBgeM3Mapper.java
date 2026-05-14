@@ -13,14 +13,14 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface ChunkBgeM3Mapper extends BaseMapper<ChunkBgeM3> {
 
-    ChunkBgeM3 selectById(String id);
+    ChunkBgeM3 selectById(Long id);
 
-    int deleteById(String id);
+    int deleteById(Long id);
 
     int updateById(ChunkBgeM3 chunkBgeM3);
 
     List<ChunkBgeM3> similaritySearch(
-            @Param("kbId") String kbId,
+            @Param("kbId") Long kbId,
             @Param("vectorLiteral") String vectorLiteral,
             @Param("limit") int limit
     );

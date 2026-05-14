@@ -13,42 +13,25 @@ import lombok.Getter;
 public class AgentDTO {
     private Long id;
 
+    private Long userId;
+
     private String name;
 
     private String description;
 
     private String systemPrompt;
 
-    private ModelType model;
+    private Long modelProviderId;
 
     private List<String> allowedTools;
 
-    private List<String> allowedKbs;
+    private List<Long> allowedKbs;
 
     private ChatOptions chatOptions;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    @Getter
-    @AllArgsConstructor
-    public enum ModelType {
-        DEEPSEEK_CHAT("deepseek-chat"),
-        GLM_4_6("glm-4.6");
-
-        @JsonValue
-        private final String modelName;
-
-        public static ModelType fromModelName(String modelName) {
-            for (ModelType type : ModelType.values()) {
-                if (type.modelName.equals(modelName)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("Unknown model type: " + modelName);
-        }
-    }
 
     @Data
     @AllArgsConstructor

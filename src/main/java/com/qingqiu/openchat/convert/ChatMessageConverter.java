@@ -22,8 +22,8 @@ public class ChatMessageConverter {
         Assert.notNull(chatMessageDTO.getRole(), "Role cannot be null");
 
         return ChatMessage.builder()
-                .id(chatMessageDTO.getId())
-                .sessionId(chatMessageDTO.getSessionId())
+            .id(chatMessageDTO.getId())
+            .sessionId(chatMessageDTO.getSessionId())
                 .role(chatMessageDTO.getRole().getRole())
                 .content(chatMessageDTO.getContent())
                 .metadata(chatMessageDTO.getMetadata() != null
@@ -39,8 +39,8 @@ public class ChatMessageConverter {
         Assert.notNull(chatMessage.getRole(), "Role cannot be null");
 
         return ChatMessageDTO.builder()
-                .id(chatMessage.getId())
-                .sessionId(chatMessage.getSessionId())
+            .id(chatMessage.getId())
+            .sessionId(chatMessage.getSessionId())
                 .role(ChatMessageDTO.RoleType.fromRole(chatMessage.getRole()))
                 .content(chatMessage.getContent())
                 .metadata(chatMessage.getMetadata() != null

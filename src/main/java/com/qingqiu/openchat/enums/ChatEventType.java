@@ -11,6 +11,7 @@ import lombok.Getter;
 public enum ChatEventType {
 
     REASONING("reasoning" ),
+    EXECUTING("executing"),
     DONE("done"),
     CONTENT("content"),
     THINKING("thinking"),

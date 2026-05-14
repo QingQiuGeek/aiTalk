@@ -8,6 +8,7 @@ target/
 !**/src/test/**/target/
 
 ### STS ###
+src/main/resources/application-prod.yml
 .apt_generated
 .classpath
 .factorypath

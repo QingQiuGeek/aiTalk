@@ -1,5 +1,7 @@
 package com.qingqiu.openchat.domain.entity;
 
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import com.qingqiu.openchat.domain.vo.ChatMessageVO;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -10,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@Table(value = "chat_message")
 public class ChatMessage {
     private String id;
 
@@ -27,7 +30,14 @@ public class ChatMessage {
     private LocalDateTime updatedAt;
 
     public static ChatMessageVO convertToVO(ChatMessage chatMessage) {
-        return null;
+        if (chatMessage == null) {
+            return null;
+        }
+        return ChatMessageVO.builder()
+            .id(chatMessage.getId())
+            .sessionId(chatMessage.getSessionId())
+                .content(chatMessage.getContent())
+                .build();
     }
 
     @Override

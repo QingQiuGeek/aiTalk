@@ -23,14 +23,14 @@ public class AgentConverter {
         Assert.notNull(agentDTO.getAllowedTools(), "Allowed tools cannot be null");
         Assert.notNull(agentDTO.getAllowedKbs(), "Allowed kbs cannot be null");
         Assert.notNull(agentDTO.getChatOptions(), "Chat options cannot be null");
-        Assert.notNull(agentDTO.getModel(), "Model cannot be null");
 
         return Agent.builder()
-                .agentId(agentDTO.getId())
+            .id(agentDTO.getId())
+            .userId(agentDTO.getUserId())
                 .name(agentDTO.getName())
                 .description(agentDTO.getDescription())
                 .systemPrompt(agentDTO.getSystemPrompt())
-                .model(agentDTO.getModel().getModelName())
+                .modelProviderId(agentDTO.getModelProviderId())
                 .allowedTools(objectMapper.writeValueAsString(agentDTO.getAllowedTools()))
                 .allowedKbs(objectMapper.writeValueAsString(agentDTO.getAllowedKbs()))
                 .chatOptions(objectMapper.writeValueAsString(agentDTO.getChatOptions()))
@@ -44,14 +44,14 @@ public class AgentConverter {
         Assert.notNull(agent.getAllowedTools(), "Allowed tools cannot be null");
         Assert.notNull(agent.getAllowedKbs(), "Allowed kbs cannot be null");
         Assert.notNull(agent.getChatOptions(), "Chat options cannot be null");
-        Assert.notNull(agent.getModel(), "Model cannot be null");
 
         return AgentDTO.builder()
-                .id(agent.getAgentId())
+            .id(agent.getId())
+            .userId(agent.getUserId())
                 .name(agent.getName())
                 .description(agent.getDescription())
                 .systemPrompt(agent.getSystemPrompt())
-                .model(AgentDTO.ModelType.fromModelName(agent.getModel()))
+                .modelProviderId(agent.getModelProviderId())
                 .allowedTools(objectMapper.readValue(agent.getAllowedTools(), new TypeReference<>(){}))
                 .allowedKbs(objectMapper.readValue(agent.getAllowedKbs(), new TypeReference<>(){}))
                 .chatOptions(objectMapper.readValue(agent.getChatOptions(), AgentDTO.ChatOptions.class))
@@ -66,7 +66,7 @@ public class AgentConverter {
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .systemPrompt(dto.getSystemPrompt())
-                .model(dto.getModel())
+            .modelProviderId(dto.getModelProviderId())
                 .allowedTools(dto.getAllowedTools())
                 .allowedKbs(dto.getAllowedKbs())
                 .chatOptions(dto.getChatOptions())
@@ -82,13 +82,13 @@ public class AgentConverter {
         Assert.notNull(request.getAllowedTools(), "Allowed tools cannot be null");
         Assert.notNull(request.getAllowedKbs(), "Allowed kbs cannot be null");
         Assert.notNull(request.getChatOptions(), "Chat options cannot be null");
-        Assert.notNull(request.getModel(), "Model cannot be null");
+        Assert.notNull(request.getModelProviderId(), "Model provider id cannot be null");
 
         return AgentDTO.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .systemPrompt(request.getSystemPrompt())
-                .model(AgentDTO.ModelType.fromModelName(request.getModel()))
+            .modelProviderId(request.getModelProviderId())
                 .allowedTools(request.getAllowedTools())
                 .allowedKbs(request.getAllowedKbs())
                 .chatOptions(request.getChatOptions())
@@ -108,8 +108,8 @@ public class AgentConverter {
         if (request.getSystemPrompt() != null) {
             dto.setSystemPrompt(request.getSystemPrompt());
         }
-        if (request.getModel() != null) {
-            dto.setModel(AgentDTO.ModelType.fromModelName(request.getModel()));
+        if (request.getModelProviderId() != null) {
+            dto.setModelProviderId(request.getModelProviderId());
         }
         if (request.getAllowedTools() != null) {
             dto.setAllowedTools(request.getAllowedTools());

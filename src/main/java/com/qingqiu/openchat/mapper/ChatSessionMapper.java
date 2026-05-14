@@ -14,7 +14,7 @@ public interface ChatSessionMapper extends BaseMapper<ChatSession> {
 
     ChatSession selectById(String id);
 
-    List<ChatSession> selectByAgentId(String agentId);
+    List<ChatSession> selectByAgentId(Long agentId);
 
     int deleteById(String id);
 

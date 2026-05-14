@@ -37,7 +37,7 @@ public class AgentController {
 
     // 删除 agent
     @DeleteMapping("/{agentId}")
-    public R<Boolean> deleteAgent(@PathVariable String agentId) {
+    public R<Boolean> deleteAgent(@PathVariable Long agentId) {
         return R.ok(agentService.deleteAgent(agentId));
     }
 

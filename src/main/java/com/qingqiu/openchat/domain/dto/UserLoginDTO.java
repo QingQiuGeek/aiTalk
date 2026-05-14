@@ -8,11 +8,7 @@ import lombok.Data;
  * @author 懒大王Smile
  */
 @Data
-public class UserLoginDTO implements Serializable {
-
-
-  //登陆凭证
-  private String token;
+public class UserLoginDTO {
 
   /**
    * 密码,可用于登录
@@ -25,6 +21,4 @@ public class UserLoginDTO implements Serializable {
    */
   private String mail;
 
-//  @TableField(exist = false)
-  private static final long serialVersionUID = 1L;
 }

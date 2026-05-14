@@ -1,19 +1,27 @@
 package com.qingqiu.openchat.domain.entity;
 
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import com.qingqiu.openchat.domain.vo.ChatSessionVO;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName chat_session
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(value = "chat_session")
 public class ChatSession {
+
     private String id;
 
-    private String agentId;
+    private Long agentId;
 
     private String title;
 
@@ -72,6 +80,13 @@ public class ChatSession {
     }
 
   public static ChatSessionVO convertToVO(ChatSession chatSession) {
-        return null;
+                if (chatSession == null) {
+                        return null;
+                }
+                return ChatSessionVO.builder()
+                                                                .id(chatSession.getId())
+                                .agentId(chatSession.getAgentId())
+                                .title(chatSession.getTitle())
+                                .build();
   }
 }

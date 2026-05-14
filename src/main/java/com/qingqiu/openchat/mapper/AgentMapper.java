@@ -11,9 +11,4 @@ import java.util.List;
  * @Entity com.kama.jchatmind.model.entity.Agent
  */
 public interface AgentMapper extends BaseMapper<Agent> {
-    Agent selectById(String id);
-
-    int deleteById(String id);
-
-    int updateById(Agent agent);
 }

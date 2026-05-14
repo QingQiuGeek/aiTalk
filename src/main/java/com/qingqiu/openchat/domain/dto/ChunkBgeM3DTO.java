@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 @Builder
 public class ChunkBgeM3DTO {
-    private String id;
+    private Long id;
 
-    private String kbId;
+    private Long kbId;
 
-    private String docId;
+    private Long docId;
 
     private String content;
 

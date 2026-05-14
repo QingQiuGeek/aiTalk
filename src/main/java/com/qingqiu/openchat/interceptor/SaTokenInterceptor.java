@@ -1,5 +1,6 @@
 package com.qingqiu.openchat.interceptor;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.stp.StpUtil;
 import com.qingqiu.openchat.enums.BizExceptionEnum;
 import com.qingqiu.openchat.exception.BizException;
@@ -28,24 +29,21 @@ public class SaTokenInterceptor implements HandlerInterceptor {
       throw new BizException(BizExceptionEnum.REQUEST_ERROR.getCode(), BizExceptionEnum.REQUEST_ERROR.getMessage());
     }
     String requestURI = request.getRequestURI();
-    if (requestURI.contains("/api/webjars") || requestURI.contains("/api/favicon.ico") || requestURI.contains("/api-docs") || requestURI.contains("/error")) {
+    if (requestURI.contains("/ai")) {
       return true;
     }
 
-    //刷新token有效期（这一步已经判断了名为authorization的token是否是真实有效的，如果是伪造或过期的token则不会刷新token，报错）
-    Long userId;
     try {
-      userId = Long.valueOf(StpUtil.getLoginId().toString());
-    } catch (Exception e) {
-      if(requestURI.contains("/ai")){
-        return true;
+      StpUtil.checkLogin();
+      if (requestURI.contains("/admin")) {
+        StpUtil.checkRole("admin");
       }
-      throw new RuntimeException(e);
+      Long userId = Long.valueOf(StpUtil.getLoginId().toString());
+      UserContext.saveUser(userId);
+      return true;
+    } catch (NotLoginException e) {
+      throw e;
     }
-
-    //虽然每次可以从stpUtil.getLoginId()获取userId，但是这样要读redis，会对其造成压力，因此这里取出来放到userContext，用的时候从userContext取
-    UserContext.saveUser(userId);
-    return true;
   }
 
   // 移除用户,防止内存泄漏!!!

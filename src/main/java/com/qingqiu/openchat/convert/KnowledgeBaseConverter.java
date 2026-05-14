@@ -21,7 +21,7 @@ public class KnowledgeBaseConverter {
         Assert.notNull(knowledgeBaseDTO, "KnowledgeBaseDTO cannot be null");
 
         return KnowledgeBase.builder()
-                .id(knowledgeBaseDTO.getId())
+            .id(knowledgeBaseDTO.getId())
                 .name(knowledgeBaseDTO.getName())
                 .description(knowledgeBaseDTO.getDescription())
                 .metadata(knowledgeBaseDTO.getMetadata() != null 
@@ -36,7 +36,7 @@ public class KnowledgeBaseConverter {
         Assert.notNull(knowledgeBase, "KnowledgeBase cannot be null");
 
         return KnowledgeBaseDTO.builder()
-                .id(knowledgeBase.getId())
+            .id(knowledgeBase.getId())
                 .name(knowledgeBase.getName())
                 .description(knowledgeBase.getDescription())
                 .metadata(knowledgeBase.getMetadata() != null 

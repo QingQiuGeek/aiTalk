@@ -2,11 +2,15 @@ package com.qingqiu.openchat.util;
 
 
 import com.qingqiu.openchat.enums.BizExceptionEnum;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 返回工具类
  * @author 懒大王Smile
  */
+@Getter
+@Setter
 public class R<T> {
 
   private int code;

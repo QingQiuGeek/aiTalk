@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class KnowledgeBaseDTO {
-    private String id;
+    private Long id;
 
     private String name;
 

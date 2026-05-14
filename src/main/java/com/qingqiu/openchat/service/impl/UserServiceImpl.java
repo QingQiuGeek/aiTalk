@@ -8,6 +8,7 @@ import static com.qingqiu.openchat.util.RegularUtil.checkPassword;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.qingqiu.openchat.enums.UserType;
 import com.qingqiu.openchat.mapper.UserMapper;
 import com.qingqiu.openchat.enums.BizExceptionEnum;
 import com.qingqiu.openchat.exception.BizException;
@@ -22,6 +23,7 @@ import com.qingqiu.openchat.util.UserContext;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -67,12 +69,12 @@ public class UserServiceImpl implements UserService {
 
     //2.根据邮箱从数据库查询用户
     QueryWrapper queryWrapper = new QueryWrapper();
-    queryWrapper.eq(User::getMail, encrypt(loginUserMail));
+    queryWrapper.eq(User::getMail, loginUserMail);
     User queryUser = userMapper.selectOneByQuery(queryWrapper);
     if (queryUser == null) {
       throw new BizException(BizExceptionEnum.NOT_REGISTER_ERROR.getCode(), BizExceptionEnum.NOT_REGISTER_ERROR.getMessage());
     }
-    if (queryUser.getStatus() == 0) {
+    if (queryUser.getStatus() == 1) {
       throw new BizException(BizExceptionEnum.FORBIDDEN_ERROR.getCode(), BizExceptionEnum.FORBIDDEN_ERROR.getMessage());
     }
 
@@ -81,7 +83,7 @@ public class UserServiceImpl implements UserService {
         throw new BizException(BizExceptionEnum.LOGIN_PARAMS_ERROR.getCode(), BizExceptionEnum.LOGIN_PARAMS_ERROR.getMessage());
       }
 
-    return loginSuccess(queryUser.getRole(), queryUser.getUserId());
+    return loginSuccess(queryUser);
   }
 
   /**
@@ -95,13 +97,15 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * @param role
+   * @param user
    */
-  private LoginUserVO loginSuccess(String role, Long userId) {
+  private LoginUserVO loginSuccess(User user) {
     LoginUserVO loginUserVO = new LoginUserVO();
-    loginUserVO.setUserId(userId);
-    UserContext.saveUser(userId);
-    StpUtil.login(userId);
+    loginUserVO.setUserId(user.getId());
+    UserContext.saveUser(user.getId());
+    StpUtil.login(user.getId());
+    loginUserVO.setTokenValue(StpUtil.getTokenValue());
+    loginUserVO.setRole(user.getRole());
     return loginUserVO;
   }
 
@@ -112,14 +116,20 @@ public class UserServiceImpl implements UserService {
     checkMailIsRegistered(mail);
     //发送验证码
     log.info("尝试发送邮箱验证码给用户：{}进行注册操作", mail);
-    log.info("开始发送邮件...获取的到邮件发送对象为:{}", mailSender);
+    String code = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
+
+    // 先落 Redis 再发邮件：避免 Redis 异常时邮件已发出导致用户重复请求收到两封验证码
+    try {
+      stringRedisTemplate.opsForValue()
+          .set(USER_REGISTER_CAPTCHA_KEY + mail, code, REGISTER_CAPTCHA_TTL, TimeUnit.MINUTES);
+    } catch (RuntimeException e) {
+      log.error("写入Redis验证码失败, mail={}", mail, e);
+      throw new BizException(BizExceptionEnum.SYSTEM_BUSY.getCode(), "验证码服务暂时不可用，请稍后重试");
+    }
+
     MailUtil mailUtil = new MailUtil(mailSender, fromEmail);
-    String code = mailUtil.sendCode(mail);
-    //验证码存入redis，有效期1min,用注册的邮箱区分验证码
-    stringRedisTemplate.opsForValue()
-        .set(USER_REGISTER_CAPTCHA_KEY + encrypt(mail), code, REGISTER_CAPTCHA_TTL, TimeUnit.MINUTES);
-    log.info("发送邮箱验证码给用户：{}成功 : {}", mail, code);
-    return StringUtils.isNotBlank(code);
+    mailUtil.sendCode(mail, code);
+    return Boolean.TRUE;
   }
 
   /**
@@ -146,7 +156,13 @@ public class UserServiceImpl implements UserService {
     checkMailIsRegistered(mail);
 
     //从redis获取验证码
-    String rightCode = stringRedisTemplate.opsForValue().get(USER_REGISTER_CAPTCHA_KEY + encrypt(mail));
+    String rightCode;
+    try {
+      rightCode = stringRedisTemplate.opsForValue().get(USER_REGISTER_CAPTCHA_KEY + mail);
+    } catch (RuntimeException e) {
+      log.error("读取Redis验证码失败, mail={}", mail, e);
+      throw new BizException(BizExceptionEnum.SYSTEM_BUSY.getCode(), "验证码服务暂时不可用，请稍后重试");
+    }
 
     //检查验证码是否存在
     if (StringUtils.isBlank(rightCode)) {
@@ -158,25 +174,32 @@ public class UserServiceImpl implements UserService {
       throw new BizException(BizExceptionEnum.CAPTCHA_ERROR.getCode(),   BizExceptionEnum.CAPTCHA_ERROR.getMessage());
     }
     //4.密码盐值加密，写入数据库，注册成功
-    User user = User.builder().password(encrypt(password)).mail(encrypt(mail)).build();
-    int insert = userMapper.insert(user);
+    String userName = mail.substring(0, mail.indexOf('@'));
+    User user = User.builder()
+      .userName(userName)
+      .password(encrypt(password))
+      .mail(mail)
+      .role(UserType.USER.getCode())
+      .build();
+    int insert = userMapper.insertSelective(user);
     if (insert <= 0) {
-      throw new BizException(BizExceptionEnum.REGISTER_ERROR.getCode(), BizExceptionEnum.REGISTER_ERROR.getMessage());
+      throw new BizException(BizExceptionEnum.REGISTER_ERROR.getCode(),
+          BizExceptionEnum.REGISTER_ERROR.getMessage());
     }
-    return loginSuccess(user.getRole(), user.getUserId());
+
+    return loginSuccess(user);
   }
 
   private void checkMailIsRegistered(String mail) {
     //发送验证码时已检查该邮箱是否注册，这里再检查一次
     QueryWrapper queryWrapper = new QueryWrapper();
-    queryWrapper.eq(User::getMail,encrypt(mail));
+    queryWrapper.eq(User::getMail, mail);
     User user = userMapper.selectOneByQuery(queryWrapper);
-    if (Objects.isNull(user)) {
+    if (Objects.nonNull(user)) {
       throw new BizException(
           BizExceptionEnum.ACCOUNT_EXISTED_ERROR.getCode(), BizExceptionEnum.ACCOUNT_EXISTED_ERROR.getMessage());
     }
   }
-
 
   /**
    * @return
@@ -195,7 +218,7 @@ public class UserServiceImpl implements UserService {
 //    }
 //    String tokenKey = Common.LOGIN_TOKEN_KEY + token;
 //    return stringRedisTemplate.delete(tokenKey);
-    return true;
+    return Boolean.TRUE;
   }
 
 
@@ -205,14 +228,19 @@ public class UserServiceImpl implements UserService {
     if (userId == null) {
       throw new BizException(BizExceptionEnum.NOT_LOGIN_ERROR.getCode(), BizExceptionEnum.NOT_LOGIN_ERROR.getMessage());
     }
-    //获取数据库最新的数据，防止用户更新完个人信息后拿到的还是老数据
-//    User user = userMapper.selectById(userId);
-//    LoginUserVO loginUserVO = new LoginUserVO();
-//    BeanUtils.copyProperties(user, loginUserVO);
-//    String ipAddress = user.getIpAddress();
-//    String ipRegion = IPUtil.getIpRegion(ipAddress);
-//    loginUserVO.setIpAddress(ipRegion);
-    return null;
+    QueryWrapper queryWrapper = new QueryWrapper();
+    queryWrapper.eq(User::getId, userId);
+    User user = userMapper.selectOneByQuery(queryWrapper);
+    if (user == null) {
+      throw new BizException(BizExceptionEnum.NOT_FOUND_ERROR.getCode(), BizExceptionEnum.NOT_FOUND_ERROR.getMessage());
+    }
+    LoginUserVO loginUserVO = new LoginUserVO();
+    loginUserVO.setUserId(user.getId());
+    loginUserVO.setTokenValue(StpUtil.getTokenValue());
+    loginUserVO.setRole(user.getRole());
+    loginUserVO.setUserName(user.getUserName());
+    loginUserVO.setMail(user.getMail());
+    return loginUserVO;
   }
 }
 

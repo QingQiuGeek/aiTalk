@@ -4,7 +4,6 @@ import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
-import com.mybatisflex.core.keygen.KeyGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -28,7 +27,7 @@ public class User implements Serializable {
    * 用户ID
    */
   @Id(keyType = KeyType.Auto)
-  private Long userId;
+  private Long id;
 
   /**
    * 用户名
@@ -53,23 +52,23 @@ public class User implements Serializable {
   /**
    * 创建时间
    */
-  private Date createAt;
+  private Date createdAt;
 
   /**
    * 修改时间
    */
-  private Date updateAt;
+  private Date updatedAt;
 
   /**
-   * 用户状态(0禁用,1正常)
+   * 用户状态(1禁用,0正常)
    */
   private Integer status;
 
   /**
-   * 0逻辑删除
+   * 1逻辑删除
    */
   @Column(isLogicDelete = true)
-  private Integer isDelete;
+  private Integer isDeleted;
 
   private static final long serialVersionUID = 1L;
 }

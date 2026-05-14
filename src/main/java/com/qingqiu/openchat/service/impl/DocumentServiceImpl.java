@@ -47,7 +47,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<DocumentVO> getDocumentsByKbId(String kbId) {
-        List<Document> documents = documentMapper.selectByKbId(kbId);
+        List<Document> documents = documentMapper.selectByKbId(Long.parseLong(kbId));
         return documents.stream().map(Document::convertToVO).toList();
     }
 
@@ -92,7 +92,7 @@ public class DocumentServiceImpl implements DocumentService {
 
             // 创建文档记录（先创建记录，获取 documentId）
             DocumentDTO documentDTO = DocumentDTO.builder()
-                    .kbId(kbId)
+                    .kbId(Long.parseLong(kbId))
                     .filename(originalFilename)
                     .filetype(filetype)
                     .size(fileSize)
@@ -148,7 +148,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void deleteDocument(String documentId) {
-        Document document = documentMapper.selectById(documentId);
+        Document document = documentMapper.selectById(Long.parseLong(documentId));
         if (document == null) {
             throw new BizException("文档不存在: " + documentId);
         }
@@ -166,7 +166,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         // 删除数据库记录
-        int result = documentMapper.deleteById(documentId);
+        int result = documentMapper.deleteById(Long.parseLong(documentId));
         if (result <= 0) {
             throw new BizException("删除文档失败");
         }
@@ -209,8 +209,8 @@ public class DocumentServiceImpl implements DocumentService {
 
                     // 创建 ChunkBgeM3 实体，存储到 chunk_bge_m3 表，用于相似性检索
                     ChunkBgeM3 chunk = ChunkBgeM3.builder()
-                            .kbId(kbId)
-                            .docId(documentId)
+                            .kbId(Long.parseLong(kbId))
+                            .docId(Long.parseLong(documentId))
                             .content(content != null ? content : "")
                             .metadata(null)
                             // 可以存储标题信息到 metadata
@@ -251,7 +251,7 @@ public class DocumentServiceImpl implements DocumentService {
     public void updateDocument(String documentId, UpdateDocumentRequest request) {
         try {
             // 查询现有的文档
-            Document existingDocument = documentMapper.selectById(documentId);
+            Document existingDocument = documentMapper.selectById(Long.parseLong(documentId));
             if (existingDocument == null) {
                 throw new BizException("文档不存在: " + documentId);
             }

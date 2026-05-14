@@ -12,6 +12,16 @@ public class LoginUserVO {
   private Long userId;
 
   /**
+   * 登录令牌
+   */
+  private String tokenValue;
+
+  /**
+   * 用户角色
+   */
+  private String role;
+
+  /**
    * 用户名
    */
   private String userName;

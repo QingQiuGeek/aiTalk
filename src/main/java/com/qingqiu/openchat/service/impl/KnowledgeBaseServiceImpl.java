@@ -1,59 +1,86 @@
 package com.qingqiu.openchat.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mybatisflex.core.query.QueryWrapper;
 import com.qingqiu.openchat.convert.KnowledgeBaseConverter;
-import com.qingqiu.openchat.exception.BizException;
-import com.qingqiu.openchat.mapper.KnowledgeBaseMapper;
 import com.qingqiu.openchat.domain.dto.KnowledgeBaseDTO;
 import com.qingqiu.openchat.domain.entity.KnowledgeBase;
 import com.qingqiu.openchat.domain.request.CreateKnowledgeBaseRequest;
 import com.qingqiu.openchat.domain.request.UpdateKnowledgeBaseRequest;
 import com.qingqiu.openchat.domain.vo.KnowledgeBaseVO;
+import com.qingqiu.openchat.exception.BizException;
 import com.qingqiu.openchat.service.KnowledgeBaseService;
-import com.qingqiu.openchat.util.UserContext;
 import jakarta.annotation.Resource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
 
     @Resource
-    private KnowledgeBaseMapper knowledgeBaseMapper;
+    private KnowledgeBaseConverter knowledgeBaseConverter;
+
     @Resource
-    private  KnowledgeBaseConverter knowledgeBaseConverter;
+    private JdbcTemplate jdbcTemplate;
+
+    private KnowledgeBase mapKnowledgeBase(ResultSet resultSet) throws SQLException {
+        return KnowledgeBase.builder()
+            .id(resultSet.getLong("id"))
+            .name(resultSet.getString("name"))
+            .description(resultSet.getString("description"))
+            .metadata(resultSet.getString("metadata"))
+            .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
+            .updatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime())
+            .build();
+    }
 
     @Override
     public List<KnowledgeBaseVO> getKnowledgeBases() {
-        QueryWrapper wrapper = QueryWrapper.create().eq(KnowledgeBase::getId, UserContext.getUser());
-        List<KnowledgeBase> knowledgeBases = knowledgeBaseMapper.selectListByQuery(wrapper);
+        List<KnowledgeBase> knowledgeBases = jdbcTemplate.query(
+            "select id, name, description, metadata, created_at, updated_at from knowledge_base where is_deleted = 0 order by created_at desc",
+            (resultSet, rowNum) -> mapKnowledgeBase(resultSet)
+        );
         return knowledgeBases.stream().map(KnowledgeBase::convertToVO).toList();
     }
 
     @Override
     public String createKnowledgeBase(CreateKnowledgeBaseRequest request) {
         try {
-            // 将 CreateKnowledgeBaseRequest 转换为 KnowledgeBaseDTO
             KnowledgeBaseDTO knowledgeBaseDTO = knowledgeBaseConverter.toDTO(request);
-            
-            // 将 KnowledgeBaseDTO 转换为 KnowledgeBase 实体
             KnowledgeBase knowledgeBase = knowledgeBaseConverter.toEntity(knowledgeBaseDTO);
-            
-            // 设置创建时间和更新时间
+
             LocalDateTime now = LocalDateTime.now();
             knowledgeBase.setCreatedAt(now);
             knowledgeBase.setUpdatedAt(now);
-            
-            // 插入数据库，ID 由数据库自动生成
-            int result = knowledgeBaseMapper.insert(knowledgeBase);
+
+            int result = jdbcTemplate.update(
+                "insert into knowledge_base (name, description, metadata, created_at, updated_at, is_deleted) values (?, ?, ?, ?, ?, 0)",
+                knowledgeBase.getName(),
+                knowledgeBase.getDescription(),
+                knowledgeBase.getMetadata(),
+                Timestamp.valueOf(now),
+                Timestamp.valueOf(now)
+            );
             if (result <= 0) {
                 throw new BizException("创建知识库失败");
             }
-            
-            return knowledgeBase.getId();
+
+            String createdId = jdbcTemplate.query(
+                "select id from knowledge_base where name = ? and created_at = ? order by created_at desc limit 1",
+                resultSet -> resultSet.next() ? String.valueOf(resultSet.getLong(1)) : null,
+                knowledgeBase.getName(),
+                Timestamp.valueOf(now)
+            );
+            if (createdId == null) {
+                throw new BizException("创建知识库失败");
+            }
+
+            return createdId;
         } catch (JsonProcessingException e) {
             throw new BizException("创建知识库时发生序列化错误: " + e.getMessage());
         }
@@ -61,12 +88,15 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
 
     @Override
     public Boolean deleteKnowledgeBase(String knowledgeBaseId) {
-        KnowledgeBase knowledgeBase = knowledgeBaseMapper.selectById(knowledgeBaseId);
+        KnowledgeBase knowledgeBase = jdbcTemplate.query(
+            "select id, name, description, metadata, created_at, updated_at from knowledge_base where id = ? and is_deleted = 0 limit 1",
+            resultSet -> resultSet.next() ? mapKnowledgeBase(resultSet) : null,
+            Long.parseLong(knowledgeBaseId)
+        );
         if (knowledgeBase == null) {
             throw new BizException("知识库不存在: " + knowledgeBaseId);
         }
-        
-        int result = knowledgeBaseMapper.deleteById(knowledgeBaseId);
+        int result = jdbcTemplate.update("delete from knowledge_base where id = ?", Long.parseLong(knowledgeBaseId));
         if (result <= 0) {
             throw new BizException("删除知识库失败");
         }
@@ -76,32 +106,34 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
     @Override
     public Boolean updateKnowledgeBase(UpdateKnowledgeBaseRequest request) {
         String knowledgeBaseId = request.getKnowledgeBaseId();
-        if(StringUtils.isBlank(knowledgeBaseId)){
+        if (StringUtils.isBlank(knowledgeBaseId)) {
             throw new BizException(500, "知识库ID不能为空");
         }
         try {
-            // 查询现有的知识库
-            KnowledgeBase existingKnowledgeBase = knowledgeBaseMapper.selectById(knowledgeBaseId);
+            KnowledgeBase existingKnowledgeBase = jdbcTemplate.query(
+                "select id, name, description, metadata, created_at, updated_at from knowledge_base where id = ? and is_deleted = 0 limit 1",
+                resultSet -> resultSet.next() ? mapKnowledgeBase(resultSet) : null,
+                Long.parseLong(knowledgeBaseId)
+            );
             if (existingKnowledgeBase == null) {
                 throw new BizException("知识库不存在: " + knowledgeBaseId);
             }
-            
-            // 将现有 KnowledgeBase 转换为 KnowledgeBaseDTO
+
             KnowledgeBaseDTO knowledgeBaseDTO = knowledgeBaseConverter.toDTO(existingKnowledgeBase);
-            
-            // 使用 UpdateKnowledgeBaseRequest 更新 KnowledgeBaseDTO
             knowledgeBaseConverter.updateDTOFromRequest(knowledgeBaseDTO, request);
-            
-            // 将更新后的 KnowledgeBaseDTO 转换回 KnowledgeBase 实体
             KnowledgeBase updatedKnowledgeBase = knowledgeBaseConverter.toEntity(knowledgeBaseDTO);
-            
-            // 保留原有的 ID 和创建时间
             updatedKnowledgeBase.setId(existingKnowledgeBase.getId());
             updatedKnowledgeBase.setCreatedAt(existingKnowledgeBase.getCreatedAt());
             updatedKnowledgeBase.setUpdatedAt(LocalDateTime.now());
-            
-            // 更新数据库
-            int result = knowledgeBaseMapper.updateById(updatedKnowledgeBase);
+
+            int result = jdbcTemplate.update(
+                "update knowledge_base set name = ?, description = ?, metadata = ?, updated_at = ? where id = ?",
+                updatedKnowledgeBase.getName(),
+                updatedKnowledgeBase.getDescription(),
+                updatedKnowledgeBase.getMetadata(),
+                Timestamp.valueOf(updatedKnowledgeBase.getUpdatedAt()),
+                Long.parseLong(knowledgeBaseId)
+            );
             if (result <= 0) {
                 throw new BizException("更新知识库失败");
             }

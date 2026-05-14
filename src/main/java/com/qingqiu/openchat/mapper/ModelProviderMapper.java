@@ -11,4 +11,10 @@ import com.qingqiu.openchat.domain.entity.ModelProvider;
 
 public interface ModelProviderMapper extends BaseMapper<ModelProvider> {
 
+	ModelProvider selectById(Long id);
+
+	int deleteById(Long id);
+
+	int updateById(ModelProvider modelProvider);
+
 }

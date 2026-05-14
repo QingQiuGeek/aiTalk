@@ -1,17 +1,22 @@
 package com.qingqiu.openchat.domain.entity;
 
+import com.mybatisflex.annotation.Column;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName agent
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Agent {
 
-    private Long agentId;
+    private Long id;
 
     private Long userId;
 
@@ -21,7 +26,8 @@ public class Agent {
 
     private String systemPrompt;
 
-    private String model;
+    @Column("model_provider_id")
+    private Long modelProviderId;
 
     // JSON String
     private String allowedTools;
@@ -41,11 +47,11 @@ public class Agent {
         return getClass().getSimpleName() +
                 " [" +
                 "Hash = " + hashCode() +
-                ", id=" + agentId +
+                ", id=" + id +
                 ", name=" + name +
                 ", description=" + description +
                 ", systemPrompt=" + systemPrompt +
-                ", model=" + model +
+                ", modelProviderId=" + modelProviderId +
                 ", allowedTools=" + allowedTools +
                 ", allowedKbs=" + allowedKbs +
                 ", chatOptions=" + chatOptions +

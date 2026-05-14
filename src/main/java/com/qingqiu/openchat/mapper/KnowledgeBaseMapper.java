@@ -12,11 +12,11 @@ import java.util.List;
 */
 public interface KnowledgeBaseMapper extends BaseMapper<KnowledgeBase> {
 
-    KnowledgeBase selectById(String id);
+    KnowledgeBase selectById(Long id);
 
-    List<KnowledgeBase> selectByIdBatch(List<String> ids);
+    List<KnowledgeBase> selectByIdBatch(List<Long> ids);
 
-    int deleteById(String id);
+    int deleteById(Long id);
 
     int updateById(KnowledgeBase knowledgeBase);
 }

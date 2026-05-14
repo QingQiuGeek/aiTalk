@@ -9,7 +9,7 @@ import lombok.Data;
 public class DocumentDTO {
     private Long id;
 
-    private String kbId;
+    private Long kbId;
 
     private String filename;
 

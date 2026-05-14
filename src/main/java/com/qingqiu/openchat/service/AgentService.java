@@ -10,7 +10,7 @@ public interface AgentService {
 
     Long createAgent(CreateAgentRequest request);
 
-    Boolean deleteAgent(String agentId);
+    Boolean deleteAgent(Long agentId);
 
     Boolean updateAgent(UpdateAgentRequest request);
 }

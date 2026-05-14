@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.qingqiu.openchat.domain.dto.SseEventDTO;
+import com.qingqiu.openchat.util.UserContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class SseEmitterManager {
         }
 
         // 1h 自动断开，发消息时间不会刷新
-        SseEmitter emitter = new SseEmitter(1000L * 60 * 60L);
+        SseEmitter emitter = new SseEmitter(1000 * 60 * 60L);
         emitters.put(sessionId, emitter);
 
         // 当 emitter 完成、超时或发生错误时，从映射表中移除对应的 sessionId
@@ -153,11 +154,11 @@ public class SseEmitterManager {
     /**
      * 向指定的用户会话发送消息
      *
-     * @param userId  要发送消息的用户id
+     * @param chatSessionId  要发送消息的用户id
      * @param message 要发送的消息内容
      */
-    public void sendMessage(Long userId, String message) {
-        Map<String, SseEmitter> emitters = USER_SESSION_EMITTERS.get(userId);
+    public void sendMessage(String chatSessionId, String message) {
+        Map<String, SseEmitter> emitters = USER_SESSION_EMITTERS.get(UserContext.getUser());
         if (MapUtil.isNotEmpty(emitters)) {
             for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
                 try {
@@ -174,18 +175,7 @@ public class SseEmitterManager {
                 }
             }
         } else {
-            USER_SESSION_EMITTERS.remove(userId);
-        }
-    }
-
-    /**
-     * 本机全用户会话发送消息
-     *
-     * @param message 要发送的消息内容
-     */
-    public void sendMessage(String message) {
-        for (Long userId : USER_SESSION_EMITTERS.keySet()) {
-            sendMessage(userId, message);
+            USER_SESSION_EMITTERS.remove(UserContext.getUser());
         }
     }
 

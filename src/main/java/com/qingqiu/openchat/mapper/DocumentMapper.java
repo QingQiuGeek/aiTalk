@@ -11,11 +11,11 @@ import java.util.List;
  * @Entity com.kama.jchatmind.model.entity.Document
  */
 public interface DocumentMapper extends BaseMapper<Document> {
-    Document selectById(String id);
+    Document selectById(Long id);
 
-    List<Document> selectByKbId(String kbId);
+    List<Document> selectByKbId(Long kbId);
 
-    int deleteById(String id);
+    int deleteById(Long id);
 
     int updateById(Document document);
 }

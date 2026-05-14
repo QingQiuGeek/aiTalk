@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ChatEvent {
-    private String agentId;
+    private Long agentId;
     private String sessionId;
     private String userInput;
 }

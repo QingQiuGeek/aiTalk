@@ -60,7 +60,7 @@ public class RagServiceImpl implements RagService {
     @Override
     public List<String> similaritySearch(String kbId, String title) {
         String queryEmbedding = toPgVector(doEmbed(title));
-        List<ChunkBgeM3> chunks = chunkBgeM3Mapper.similaritySearch(kbId, queryEmbedding, 3);
+        List<ChunkBgeM3> chunks = chunkBgeM3Mapper.similaritySearch(Long.parseLong(kbId), queryEmbedding, 3);
         return chunks.stream().map(ChunkBgeM3::getContent).toList();
     }
 

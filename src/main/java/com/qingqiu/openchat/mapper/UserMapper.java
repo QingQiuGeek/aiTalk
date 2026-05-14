@@ -11,4 +11,6 @@ import com.qingqiu.openchat.domain.entity.User;
 
 public interface UserMapper extends BaseMapper<User> {
 
+	User selectById(Long id);
+
 }

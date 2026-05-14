@@ -36,7 +36,7 @@ public class ModelProviderController {
      * 查询厂商管理列表
      */
     @GetMapping
-    public R<List<ModelProviderVO>> list(@RequestBody QueryModelProviderRequest queryModelProviderRequest) {
+    public R<List<ModelProviderVO>> list(QueryModelProviderRequest queryModelProviderRequest) {
         return R.ok(modelProviderService.query(queryModelProviderRequest));
     }
 

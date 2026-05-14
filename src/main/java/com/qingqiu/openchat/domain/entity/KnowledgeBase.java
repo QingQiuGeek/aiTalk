@@ -1,17 +1,23 @@
 package com.qingqiu.openchat.domain.entity;
 
+import com.mybatisflex.annotation.Table;
 import com.qingqiu.openchat.domain.vo.KnowledgeBaseVO;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName knowledge_base
  */
 @Data
 @Builder
+@NoArgsConstructor
+@Table(value = "knowledge_base")
+@AllArgsConstructor
 public class KnowledgeBase {
-    private String id;
+    private Long id;
 
     private String name;
 
@@ -28,7 +34,7 @@ public class KnowledgeBase {
             return null;
         }
         return KnowledgeBaseVO.builder()
-                .id(knowledgeBase.getId())
+            .id(knowledgeBase.getId())
                 .name(knowledgeBase.getName())
                 .description(knowledgeBase.getDescription())
                 .build();

@@ -1,11 +1,22 @@
 package com.qingqiu.openchat.domain.request;
 
-/**
- * @author: Qing Qiu
- * @date: 2026/4/8 20:34
- * @description:
- */
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class QueryModelProviderRequest {
+
+	private Long id;
+
+	private Long userId;
+
+	private String modelName;
+
+	private String providerType;
 
 }

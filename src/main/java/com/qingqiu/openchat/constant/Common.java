@@ -29,10 +29,10 @@ public interface Common {
   //限制可上传的图片大小单位
   String IMG_SIZE_UNIT = "M";
 
-  //注册验证码有效期 1min
-  Long REGISTER_CAPTCHA_TTL = 1L;
+  //注册验证码有效期
+  Long REGISTER_CAPTCHA_TTL = 60L;
 
-  String USER_REGISTER_CAPTCHA_KEY = "Blog:user:registerCaptcha:";
+  String USER_REGISTER_CAPTCHA_KEY = "openchat:user:registerCaptcha:";
 
   //邮箱正则
   String EMAIL_REGEX = "\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14}";
